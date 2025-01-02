@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import Mesh, { IMesh } from "../models/meshModel";
+import Mesh, { IMesh } from "../db/models/meshModel";
 
 class MeshRepository {
   async createMesh(data: IMesh): Promise<IMesh> {

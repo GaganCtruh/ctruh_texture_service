@@ -1,37 +1,40 @@
-// src/index.ts
 import express from "express";
 import cors from "cors";
-import mongoose from "mongoose";
 import router from "./routes/meshRoute";
+import { APP_PORT, MONGODB_DB, MONGODB_URI } from "./config";
+import mongoose from "mongoose";
+import logger from "./logger/logger";
+import { appInitializationLogs, getHomePageHTML } from "./lib/helpers/app.helper";
+import { addAppMetaHeaders } from "./middlewares/appMeta.middleware";
 
 // Enable dotenv if you're using environment variables
 
-
 const app = express();
-const PORT = process.env.PORT || 9000;
+const port = APP_PORT || 9000;
 
 app.use(cors()); // Enable CORS with default settings
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
-
-app.get("/health", async (req, res, next) => {
-  try {
-    res.send("I am running fine");
-  } catch (err) {
-    next(err); // Passes the error to the error handling middleware
-  }
-});
 mongoose
-  .connect("mongodb://localhost:27017/scenedb")
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.log("MongoDB connection error:", err));
+    .connect(MONGODB_URI, { dbName: MONGODB_DB })
+    .then(() => logger.info("MongoDB connected"))
+    .catch(err => logger.error("MongoDB connection error:", err));
 
+//Add app meta headers X-MS-Name and X-MS-Version
+app.use(addAppMetaHeaders);
 
-// Start the server
-app.use("/api/mesh",router );
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+app.get("/", (req, res) => res.send(getHomePageHTML()));
+app.use("/api/mesh", router);
+
+app.listen(port, async () => {
+    appInitializationLogs(port);
+});
+
+process.on("uncaughtException", (error: Error) => {
+    logger.error("An uncaughtException : ", error);
+});
+
+process.on("unhandledRejection", (reason: any, promise: Promise<any>) => {
+    const error = reason instanceof Error ? reason : new Error(JSON.stringify(reason));
+    throw error;
 });
