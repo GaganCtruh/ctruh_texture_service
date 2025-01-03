@@ -4,7 +4,6 @@ dotenv.config();
 export const {
     APP_NAME,
     APP_PORT,
-    APP_TARGET,
     NODE_ENV,
     AZURE_BLOB_CONNECTION_STRING,
     AZURE_CONTAINER_NAME,

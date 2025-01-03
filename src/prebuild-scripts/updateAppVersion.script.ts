@@ -23,7 +23,7 @@ async function updateVersion() {
         const date = new Date(lastCommitDate);
         formattedDate = `${date.getFullYear()}.${(date.getMonth() + 1).toString().padStart(2, "0")}.${date.getDate().toString().padStart(2, "0")}`;
     } catch (error) {
-        console.error("Failed to get last commit date from git. Falling back to the current date.");
+        logger.error("Failed to get last commit date from git. Falling back to the current date.");
         // If git fails, use the current date
         const now = new Date();
         formattedDate = `${now.getFullYear()}.${(now.getMonth() + 1).toString().padStart(2, "0")}.${now.getDate().toString().padStart(2, "0")}`;
@@ -41,10 +41,10 @@ async function updateVersion() {
         await execPromise("npx prettier --write package.json");
         logger.info(`Formatted package.json using Prettier.`);
     } catch (error) {
-        console.error("Failed to format package.json using Prettier.");
+        logger.error("Failed to format package.json using Prettier.");
     }
 
     logger.info(`Version updated to ${formattedDate}`);
 }
 
-updateVersion().catch(err => console.error("Unexpected error:", err));
+updateVersion().catch(err => logger.error("Unexpected error:", err));

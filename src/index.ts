@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 import logger from "./logger/logger";
 import { appInitializationLogs, getHomePageHTML } from "./lib/helpers/app.helper";
 import { addAppMetaHeaders } from "./middlewares/appMeta.middleware";
+import { setupMetrics } from "./metrics";
 
 // Enable dotenv if you're using environment variables
 
@@ -22,6 +23,9 @@ mongoose
 
 //Add app meta headers X-MS-Name and X-MS-Version
 app.use(addAppMetaHeaders);
+
+// Setup service metrics
+setupMetrics(app);
 
 app.get("/", (req, res) => res.send(getHomePageHTML()));
 app.use("/api/mesh", router);

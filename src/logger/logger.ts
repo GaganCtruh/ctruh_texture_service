@@ -1,5 +1,4 @@
 import { createLogger, format, transports } from "winston";
-// import { connectToMongoDB } from "../db/connection"; // Import getCollection function
 import { getAppMetaData } from "../lib/helpers/app.helper";
 import sourceMapSupport from "source-map-support";
 import path from "path";
@@ -7,6 +6,7 @@ import LokiTransport from "winston-loki";
 import { APP_NAME, LOKI_AUTH_CREDENTIAL, LOKI_URL, NODE_ENV } from "../config";
 import { isDevEnv } from "../lib/helpers/auth.helper";
 import ErrorLogService from "../service/textureErrorLogsService";
+import { ITextureErrorLogs } from "../db/models/textureErrorLogsModel";
 
 // Enable source map support
 sourceMapSupport.install();
@@ -110,7 +110,7 @@ const logger = createLogger({
                   new LokiTransport({
                       host: LOKI_URL, // Change this to your Loki URL
                       basicAuth: LOKI_AUTH_CREDENTIAL,
-                      onConnectionError: error => console.error("Loki connection error", error),
+                      onConnectionError: error => logger.error("Loki connection error", error),
                       labels: { service: `${NODE_ENV}-${APP_NAME}-${appMeta.name}` },
                       json: true,
                       format: format.combine(
@@ -129,24 +129,20 @@ logger.on("data", async log => {
     if (log.level === "error") {
         try {
             if (isDevEnv()) return;
-
-            // const db = await connectToMongoDB(`platform_error_logs`);
-            // const collection = db.collection(`${appMeta.name}_logs`);
             const { timestamp, level, message, stack, name } = log;
             const { fileName, lineNumber } = stack ? extractFileNameAndLineNumber(stack) : { fileName: "N/A", lineNumber: "N/A" };
             const errorDetails = {
                 timestamp: formatTimestamp(timestamp), // Convert timestamp to readable format
                 level,
                 message,
-                stack,
-                name,
+                stack: stack ?? null,
+                name: name ?? null,
                 fileName,
                 lineNumber,
-            };
-            // WIP - Remove comment later
-            // await ErrorLogService.createErrorLog(errorDetails);
+            } as ITextureErrorLogs;
+            await ErrorLogService.createErrorLog(errorDetails);
         } catch (err) {
-            console.error("Failed to log to MongoDB", err);
+            logger.error("Failed to log to MongoDB", err);
         }
     }
 });
