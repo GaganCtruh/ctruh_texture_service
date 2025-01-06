@@ -11,15 +11,15 @@ const router = Router();
 router.get("/", getAllMeshes);
 
 // Get mesh by ID
-router.get("/:id", getMeshById);
+// router.get("/:id", getMeshById);
 
 // Get meshes by type
-router.get("/type/:meshType", getMeshesByType);
+// router.get("/type/:meshType", getMeshesByType);
 
 // Upload mesh (texture and screenshot)
-router.post("/", upload.fields([{ name: "textureImg" }, { name: "screenShot" }]), uploadMesh);
+// router.post("/", upload.fields([{ name: "textureImg" }, { name: "screenShot" }]), uploadMesh);
 
 // Delete mesh
-router.delete("/:id", deleteMesh);
+// router.delete("/:id", deleteMesh);
 
 export default router;

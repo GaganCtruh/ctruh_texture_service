@@ -5,7 +5,6 @@ import mongoose from "mongoose";
 // Get all meshes
 export async function getAllMeshes(req: Request, res: Response): Promise<Response> {
     try {
-        console.log("CALLED GET ALL MESHES");
         const meshes = await MeshService.getAllMeshes();
         return res.status(200).json(meshes);
     } catch (error: any) {
